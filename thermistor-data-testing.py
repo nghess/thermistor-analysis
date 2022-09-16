@@ -1,8 +1,10 @@
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.signal as spysig
+
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     # https://stackoverflow.com/questions/20618804/how-to-smooth-a-curve-in-the-right-way
@@ -28,14 +30,14 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
 # Import .dat and zip raw and smoothed into DF
 data = np.fromfile('.dat/thermistor2.dat', dtype=float)
+#normalize
+data = np.subtract(data, np.min(data)) / (np.max(data)-np.min(data))
+
 time = [t for t in range(len(data))]
-dat_hat = savitzky_golay(data, 33, 3) # window size 51, polynomial order 3
+dat_hat = savitzky_golay(data, 101, 3) # window size 51, polynomial order 3
 ts = list(zip(time, data, dat_hat))
 df = pd.DataFrame(ts, columns=['time', 'data', 'dat_hat'])
 
-#Plotly
-fig = px.line(df[:1000], x='time', y=df.columns)
-fig.show()
 
 
 #Smoothing data in python:
@@ -43,13 +45,6 @@ rolling_window = 21
 therm_3 = np.convolve(dat_hat, np.ones((rolling_window,))/rolling_window, mode='same')
 #rolling window - how much you want to smooth by - depends on each signal
 #every 21 samples for Reese's data - mice sniff at 16 hz, don't want window bigger than 50 - could smooth out fast sniffs
-#needs to be an odd number to center
-
-plt.plot(therm_3)
-#plt.xlim(1600,2400) #800 sample chunk is 1 second
-#plt.show()
-
-#Finding data peaks in python:
 
 peakwindow=21
 localmaxima = spysig.argrelmax(therm_3, order=peakwindow)
@@ -60,3 +55,23 @@ localmaxima = localmaxima[0]
 #plt.show()
 
 print(localmaxima)
+
+peaks = []
+
+for i in localmaxima:
+    peaks.append(data[i])
+
+print(peaks)
+
+peaks_zip = list(zip(localmaxima, peaks))
+peaks_df = pd.DataFrame(peaks_zip, columns=['localmaxima', 'peaks'])
+
+fraction = 8
+
+#Plotly
+fig_lines = px.line(df[:len(df)//fraction], x='time', y='dat_hat')
+fig_point = px.scatter(peaks_df[:len(peaks_df)//fraction], x='localmaxima', y='peaks', color_discrete_sequence=['red'])
+
+fig = go.Figure(data=fig_point.data+fig_lines.data)
+
+fig.show()
