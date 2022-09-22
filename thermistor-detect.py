@@ -14,7 +14,7 @@ width = 800
 height = 300
 middle = int(width/2)
 end = width-1
-
+margin = 100
 
 i = 0  # timestep
 k = 20  # K for rolling mean
@@ -37,7 +37,7 @@ while True:
     if len(trail_raw) == end:
         trail_raw = trail_raw[1:]
     for t in range(1, len(trail_raw)):  # For loops are way too slow. Figure out alternative.
-        display[trail_raw[-t], end-t] = (0, 0, 128)
+        display[trail_raw[-t], end-t-margin] = (0, 0, 128)
 
     # Compile trail for AVG values
     if len(trail_raw) >= k:
@@ -45,24 +45,26 @@ while True:
         trail_avg.append(running_avg)
         # Draw running avg trail
         for t in range(1, len(trail_avg)):
-            display[trail_avg[-t], end-t] = (255, 255, 0)
+            display[trail_avg[-t], end-t-margin] = (255, 255, 0)
 
+    # Print avg Y Value
+    if len(trail_raw) >= k:
+        cur_y = round(1-(running_avg/height), 2)
+        cv2.putText(display, str(cur_y), (width-margin+50, trail_avg[-1]), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
+
+    # Get differential
+    cur_diff = np.ediff1d(trail_avg[-2:])
+    print(cur_diff)
+    
     # Print timestamp
     cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
-    # Print avg Y Value
-    cur_y = round(1-(running_avg/height), 2)
-    cv2.putText(display, str(cur_y), (width-50, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
-
-
 
     # Clear out of frame values from trail
-    if len(trail_raw) == end:
+    if len(trail_raw) == end-margin:
         trail_raw = trail_raw[1:]
 
-    if len(trail_avg) == end:
+    if len(trail_avg) == end-margin:
         trail_avg = trail_avg[1:]
-
-
 
     cv2.imshow('Thermistor Signal', display)
     cv2.waitKey(16)
