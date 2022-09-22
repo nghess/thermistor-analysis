@@ -47,7 +47,7 @@ while True:
             display[trail_avg[-t], end-t] = (255, 255, 0)
 
     # Print timestamp
-    cv2.putText(display, str(i), (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
+    cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
     # Print avg Y Value
     cur_y = round(1-(running_avg/height), 2)
     cv2.putText(display, str(cur_y), (width-50, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
