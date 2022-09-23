@@ -12,7 +12,8 @@ time = [t for t in range(len(data))]
 # Display window dims
 width = 800
 height = 300
-middle = int(width/2)
+mid_w = int(width/2)
+mid_h = int(height/2)
 end = width-1
 margin = 100
 
@@ -21,6 +22,15 @@ k = 20  # K for rolling mean
 trail_raw = []
 trail_avg = []
 running_avg = 0  # var to report avg Y value
+
+
+def get_slope(traj, step, img):
+    p1 = np.asarray([1, traj[-1]])
+    p2 = np.asarray([0, traj[-1-step]])
+    vec = (np.subtract(p1, p2))
+    norm = np.linalg.norm(vec)
+    vec = vec / norm
+    return vec
 
 
 while True:
@@ -47,15 +57,23 @@ while True:
         for t in range(1, len(trail_avg)):
             display[trail_avg[-t], end-t-margin] = (255, 255, 0)
 
+        step = 1
+        if len(trail_avg) > step:
+            # Show slope
+            vec = get_slope(trail_avg, 1, display)
+
+            cv2.line(display, (0, 0), vec, color=(255, 0, 0), thickness=1)
+            print(vec)
+
     # Print avg Y Value
     if len(trail_raw) >= k:
         cur_y = round(1-(running_avg/height), 2)
         cv2.putText(display, str(cur_y), (width-margin+50, trail_avg[-1]), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
 
     # Get differential
-    cur_diff = np.ediff1d(trail_avg[-2:])
-    print(cur_diff)
-    
+    #cur_diff = np.ediff1d(trail_avg[-2:])
+    #print(cur_diff)
+
     # Print timestamp
     cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
 
