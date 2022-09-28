@@ -66,7 +66,7 @@ print(peaks)
 peaks_zip = list(zip(localmaxima, peaks))
 peaks_df = pd.DataFrame(peaks_zip, columns=['localmaxima', 'peaks'])
 
-fraction = 20
+fraction = 2
 
 #Plotly
 fig_lines = px.line(df[:len(df)//fraction], x='time', y='dat_hat')
