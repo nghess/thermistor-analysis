@@ -13,7 +13,7 @@ time = [t for t in range(len(data))]
 width = 800
 height = 300
 middle = int(width/2)
-end = width-1
+span = width-1
 
 
 i = 0  # timestep
@@ -23,6 +23,11 @@ trail_avg = []
 running_avg = 0  # var to report avg Y value
 
 
+def clear_overflow(end, *args):
+    for x in args:
+        if len(args) == end:
+            args = args[1:]
+
 while True:
     i += 1  # Time
     therm = int((1-data[i])*height)-1  # Thermistor value
@@ -30,14 +35,14 @@ while True:
     #Clear frame
     display = np.zeros((height, width, 3), dtype=np.uint8)
     # Latest raw thermistor value
-    display[therm, end] = (0, 0, 255)
+    display[therm, span] = (0, 0, 255)
 
     # Compile trail for raw values
     trail_raw.append(therm)
-    if len(trail_raw) == end:
+    if len(trail_raw) == span:
         trail_raw = trail_raw[1:]
     for t in range(1, len(trail_raw)):  # For loops are way too slow. Figure out alternative.
-        display[trail_raw[-t], end-t] = (0, 0, 128)
+        display[trail_raw[-t], span-t] = (0, 0, 128)
 
     # Compile trail for AVG values
     if len(trail_raw) >= k:
@@ -45,7 +50,7 @@ while True:
         trail_avg.append(running_avg)
         # Draw running avg trail
         for t in range(1, len(trail_avg)):
-            display[trail_avg[-t], end-t] = (255, 255, 0)
+            display[trail_avg[-t], span-t] = (255, 255, 0)
 
     # Print timestamp
     cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
@@ -54,14 +59,8 @@ while True:
     cv2.putText(display, str(cur_y), (width-50, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
 
 
-
-    # Clear out of frame values from trail
-    if len(trail_raw) == end:
-        trail_raw = trail_raw[1:]
-
-    if len(trail_avg) == end:
-        trail_avg = trail_avg[1:]
-
+    # Clear out of frame values from trails
+    clear_overflow(span, trail_raw, trail_avg)
 
 
     cv2.imshow('Thermistor Signal', display)

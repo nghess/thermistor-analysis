@@ -30,8 +30,14 @@ def get_slope(traj, step, img):
     vec = (np.subtract(p1, p2))
     norm = np.linalg.norm(vec)
     vec = vec / norm
+    vec = (int(vec[0]), int(vec[1]))
     return vec
 
+
+def clear_overflow(end, *args):
+    for x in args:
+        if len(args) == end:
+            args = args[1:]
 
 while True:
     i += 1  # Time
@@ -40,7 +46,7 @@ while True:
     #Clear frame
     display = np.zeros((height, width, 3), dtype=np.uint8)
     # Latest raw thermistor value
-    display[therm, end] = (0, 0, 255)
+    display[therm, end-margin] = (0, 255, 255)
 
     # Compile trail for raw values
     trail_raw.append(therm)
@@ -70,19 +76,12 @@ while True:
         cur_y = round(1-(running_avg/height), 2)
         cv2.putText(display, str(cur_y), (width-margin+50, trail_avg[-1]), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 0))
 
-    # Get differential
-    #cur_diff = np.ediff1d(trail_avg[-2:])
-    #print(cur_diff)
-
     # Print timestamp
     cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
 
     # Clear out of frame values from trail
-    if len(trail_raw) == end-margin:
-        trail_raw = trail_raw[1:]
+    clear_overflow(end, trail_raw, trail_avg)
 
-    if len(trail_avg) == end-margin:
-        trail_avg = trail_avg[1:]
 
     cv2.imshow('Thermistor Signal', display)
     cv2.waitKey(16)
