@@ -44,7 +44,7 @@ while True:
         display[trail_raw[-t], end-t] = (0, 0, 128)
 
     # Print timestamp
-    #cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
+    cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
 
     # LSR
     if len(trail_raw) >= window:
@@ -84,6 +84,7 @@ while True:
 
 
     cv2.imshow('Thermistor Signal', display)
+    cv2.imwrite("output/lsr-rt/" + str(i) + ".png", display)
     cv2.waitKey(8)
 
     if i == len(data)-1:
