@@ -86,7 +86,7 @@ while True:
 
     # Display Results
     cv2.imshow('Thermistor Signal', display)
-    #cv2.imwrite("output/lsr-rt/" + str(i) + ".png", display)
+    cv2.imwrite("output/lsr-rt/" + str(i) + ".png", display)
     cv2.waitKey(8)
 
     # If all data has been read, restart feed
