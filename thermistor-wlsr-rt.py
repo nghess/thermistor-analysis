@@ -86,9 +86,11 @@ while True:
 
     # Display Results
     cv2.imshow('Thermistor Signal', display)
-    cv2.imwrite("output/lsr-rt/" + str(i) + ".png", display)
-    cv2.waitKey(8)
+    #cv2.imwrite("output/lsr-rt/" + str(i) + ".png", display)
+    cv2.waitKey(16)
 
     # If all data has been read, restart feed
     if i == len(data)-1:
         i = 0
+        print(len(sniffs))
+        break
