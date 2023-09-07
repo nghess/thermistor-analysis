@@ -1,10 +1,13 @@
 import numpy as np
 import cv2
 
+
 # Import .dat and zip raw and smoothed into DF
 data = np.fromfile('.dat/thermistor2.dat', dtype=float)
+
 # Normalize
 data = np.subtract(data, np.min(data)) / (np.max(data)-np.min(data))
+
 # Time axis
 time = [t for t in range(len(data))]
 
@@ -14,9 +17,10 @@ height = 500
 middle = int(width/2)
 end = width-1
 
-#LSR Window
+# LSR Window
 window = 20
 
+# Initialize
 i = 0  # timestep
 debounce = 0  # debounce timer
 trail_raw = []  # list to store data as it comes in
@@ -30,7 +34,7 @@ while True:
 
     therm = int((1-data[i])*height)-1  # Thermistor value
 
-    #Clear frame
+    # Clear frame
     display = np.zeros((height, width, 3), dtype=np.uint8)
     # Latest raw thermistor value
     display[therm, end] = (0, 0, 255)
@@ -40,7 +44,7 @@ while True:
     if len(trail_raw) == end:
         trail_raw = trail_raw[1:]
     for t in range(1, len(trail_raw)):  # For loops are way too slow. Figure out alternative.
-        display[trail_raw[-t], end-t] = (0, 0, 128)
+        display[trail_raw[-t], end-t] = (0, 0, 255)
 
     # Print timestamp
     cv2.putText(display, f'{i} ms', (5, 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.25, color=(255, 255, 255))
@@ -63,7 +67,7 @@ while True:
         if m > 1:
             color = (255, 255, 0)
         else:
-            color = (0, 0, 255)
+            color = (0, 255, 255)
 
         # Try to pull out sniffs
         if len(slope_compare) == 2 and slope_compare[1] > 1 > slope_compare[0] and debounce <= 0:
